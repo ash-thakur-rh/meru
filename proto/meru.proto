@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package meru;
+
+option go_package = "github.com/ash-thakur-rh/meru/internal/proto;merupb";
+
+// MeruNode is the service exposed by each remote agent node.
+// The control-plane (local Meru daemon) is the only client.
+service MeruNode {
+  // Ping checks connectivity and returns node capabilities.
+  rpc Ping(PingRequest) returns (PingResponse);
+
+  // Spawn creates a new agent session on the remote node.
+  // The control plane provides the session ID so it can reconnect after restart.
+  rpc Spawn(SpawnRequest) returns (SpawnResponse);
+
+  // Send delivers a prompt to a session and streams events back.
+  rpc Send(SendRequest) returns (stream EventMessage);
+
+  // Stop terminates a session on the remote node.
+  rpc Stop(StopRequest) returns (StopResponse);
+
+  // GetSession returns the current state of a session.
+  rpc GetSession(GetSessionRequest) returns (SessionInfo);
+
+  // ListSessions returns all sessions known to the remote node.
+  rpc ListSessions(Empty) returns (ListSessionsResponse);
+
+  // GetLogs returns historical events for a session.
+  rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+
+  // ListDir returns the entries of a directory on the remote node's filesystem.
+  rpc ListDir(ListDirRequest) returns (ListDirResponse);
+
+  // GitClone clones a git repository on the remote node.
+  rpc GitClone(GitCloneRequest) returns (GitCloneResponse);
+}
+
+message Empty {}
+
+// --- Ping ---
+
+message PingRequest {}
+
+message PingResponse {
+  string version = 1;           // meru-node binary version
+  repeated string agents = 2;   // agent names registered on this node
+  string hostname = 3;
+}
+
+// --- Spawn ---
+
+message SpawnRequest {
+  string session_id = 1;  // assigned by control plane
+  string agent      = 2;
+  string name       = 3;
+  string workspace  = 4;
+  string model      = 5;
+  map<string, string> env = 6;
+  bool   worktree   = 7;  // create an isolated git worktree on the node before spawning
+}
+
+message SpawnResponse {
+  string session_id = 1;
+  string name       = 2;
+  string workspace  = 3;
+}
+
+// --- Send ---
+
+message SendRequest {
+  string session_id = 1;
+  string prompt     = 2;
+}
+
+message EventMessage {
+  string type             = 1;  // text | tool_use | tool_result | done | error
+  string text             = 2;
+  string tool_name        = 3;
+  string tool_input       = 4;
+  string error            = 5;
+  int64  timestamp_unix_ms = 6;
+}
+
+// --- Stop ---
+
+message StopRequest {
+  string session_id = 1;
+}
+
+message StopResponse {}
+
+// --- Sessions ---
+
+message GetSessionRequest {
+  string session_id = 1;
+}
+
+message SessionInfo {
+  string session_id = 1;
+  string name       = 2;
+  string agent      = 3;
+  string workspace  = 4;
+  string status     = 5;
+}
+
+message ListSessionsResponse {
+  repeated SessionInfo sessions = 1;
+}
+
+// --- Logs ---
+
+message GetLogsRequest {
+  string session_id = 1;
+}
+
+message GetLogsResponse {
+  repeated EventMessage events = 1;
+}
+
+// --- Git ---
+
+message GitCloneRequest {
+  string url      = 1;  // HTTPS or SSH git URL
+  string dest     = 2;  // absolute path on the node; empty = auto under ~/meru-workspaces
+  string username = 3;  // HTTPS username (empty for public repos or SSH)
+  string password = 4;  // HTTPS password or personal access token
+}
+
+message GitCloneResponse {
+  string path = 1;  // absolute path of the cloned repository
+}
+
+// --- Filesystem ---
+
+message ListDirRequest {
+  string path = 1;  // absolute path to list; empty string means home directory
+}
+
+message DirEntry {
+  string name   = 1;  // filename (not full path)
+  string path   = 2;  // absolute path
+  bool   is_dir = 3;
+}
+
+message ListDirResponse {
+  string            path    = 1;  // the resolved absolute path that was listed
+  string            parent  = 2;  // parent directory path (empty at filesystem root)
+  repeated DirEntry entries = 3;
+}

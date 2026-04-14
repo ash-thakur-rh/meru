@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode: .dark on <html> activates dark: variants */
+@variant dark (&:where(.dark, .dark *));
+
+body {
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* xterm.js sizing */
+.xterm-container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+.xterm-container .xterm {
+  height: 100%;
+  padding: 8px;
+}

@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Unit & integration tests ──────────────────────────────────────────────
+  test-unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # cmd/meru embeds internal/ui/dist via //go:embed.
+      # Create a minimal stub so the package compiles without a full UI build.
+      - name: Create UI stub for compilation
+        run: |
+          mkdir -p internal/ui/dist
+          echo '<!DOCTYPE html><html><body>stub</body></html>' > internal/ui/dist/index.html
+
+      - name: Run unit and integration tests
+        run: go test -race -count=1 ./...
+
+  # ── Smoke tests (builds the real binary) ─────────────────────────────────
+  test-smoke:
+    name: Smoke tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build web UI
+        run: |
+          npm --prefix web ci
+          npm --prefix web run build
+          rm -rf internal/ui/dist
+          cp -r web/dist internal/ui/dist
+
+      - name: Run smoke tests
+        run: go test -tags smoke -count=1 ./tests/...
+
+  # ── Lint ─────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Create UI stub for compilation
+        run: |
+          mkdir -p internal/ui/dist
+          echo '<!DOCTYPE html><html><body>stub</body></html>' > internal/ui/dist/index.html
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+
+  # ── Format check ──────────────────────────────────────────────────────────
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        run: npm --prefix web ci
+
+      - name: Check Go formatting
+        run: |
+          unformatted=$(gofmt -l $(find . -name '*.go' -not -path './vendor/*'))
+          if [ -n "$unformatted" ]; then
+            echo "The following Go files are not formatted (run 'make fmt' to fix):"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Check web formatting
+        run: npm --prefix web run format:check
+
+  # ── Vet ───────────────────────────────────────────────────────────────────
+  vet:
+    name: Vet
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Create UI stub for compilation
+        run: |
+          mkdir -p internal/ui/dist
+          echo '<!DOCTYPE html><html><body>stub</body></html>' > internal/ui/dist/index.html
+
+      - name: go vet
+        run: go vet ./...

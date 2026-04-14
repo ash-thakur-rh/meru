@@ -1,0 +1,67 @@
+version: "2"
+
+formatters:
+  enable:
+    - gofmt
+
+linters:
+  default: none
+  enable:
+    - errcheck       # unhandled errors
+    - govet          # go vet checks
+    - ineffassign    # ineffectual assignments
+    - staticcheck    # comprehensive static analysis (includes gosimple)
+    - unused         # unused code
+    - misspell       # spelling mistakes in comments/strings
+    - bodyclose      # HTTP response bodies must be closed
+    - unconvert      # unnecessary type conversions
+    - unparam        # unused function parameters
+
+  settings:
+    errcheck:
+      exclude-functions:
+        # Errors from fmt writers are propagated through Flush(); ignore here.
+        - fmt.Fprintln
+        - fmt.Fprintf
+        - fmt.Fprint
+        # Closing readers/closers in a defer is idiomatic; error is unactionable.
+        - (io.ReadCloser).Close
+        - (io.Closer).Close
+
+    govet:
+      enable-all: true
+      disable:
+        - shadow        # too noisy
+        - fieldalignment  # micro-optimisation, not a correctness issue
+
+    staticcheck:
+      checks: ["all", "-SA1019"]
+
+  exclusions:
+    paths:
+      - "web/node_modules"
+
+    rules:
+      # Test files — relax error and param checks.
+      - path: "_test\\.go"
+        linters:
+          - errcheck
+          - unparam
+
+      # Generated protobuf code.
+      - path: "internal/proto/"
+        linters:
+          - errcheck
+          - unused
+          - unparam
+          - govet
+
+      # defer *.Close() — error is unactionable; idiomatic Go pattern.
+      - text: "Error return value of `.*\\.Close` is not checked"
+        linters:
+          - errcheck
+
+      # defer *.Flush() — errors propagate through the caller's return.
+      - text: "Error return value of `.*\\.Flush` is not checked"
+        linters:
+          - errcheck
