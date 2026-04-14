@@ -37,9 +37,9 @@ export function Dashboard() {
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between bg-white dark:bg-slate-950">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🎼</span>
+          <img src="/favicon.svg" alt="Meru" className="w-8 h-8"/>
           <div>
-            <h1 className="text-lg font-semibold leading-none">Conductor</h1>
+            <h1 className="text-lg font-semibold leading-none">Meru</h1>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               Local agent orchestrator
             </p>

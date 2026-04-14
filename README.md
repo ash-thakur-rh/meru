@@ -1,5 +1,8 @@
 # Meru
 
+[![CI](https://github.com/ash-thakur-rh/meru/actions/workflows/ci.yml/badge.svg)](https://github.com/ash-thakur-rh/meru/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ash-thakur-rh/meru)](https://github.com/ash-thakur-rh/meru/releases/latest)
+
 Orchestrate multiple AI coding agents — Claude Code, Aider, OpenCode, Goose, and more — from a single binary.
 
 **No setup. No config. No extra processes.** Download the binary, run `meru serve`, and start orchestrating.

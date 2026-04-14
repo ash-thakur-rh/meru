@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
@@ -63,10 +61,9 @@ func runAttach(cmd *cobra.Command, args []string) error {
 		sendResize(conn, cols, rows)
 	}
 
-	// SIGWINCH — forward terminal resize to the PTY.
-	winch := make(chan os.Signal, 1)
-	signal.Notify(winch, syscall.SIGWINCH)
-	defer signal.Stop(winch)
+	// Forward terminal resize events to the PTY (no-op on Windows).
+	stopResize := watchResize(conn, fd)
+	defer stopResize()
 
 	done := make(chan struct{})
 
@@ -99,15 +96,6 @@ func runAttach(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				stdinErr <- err
 				return
-			}
-		}
-	}()
-
-	// Resize watcher goroutine.
-	go func() {
-		for range winch {
-			if cols, rows, err := term.GetSize(fd); err == nil {
-				sendResize(conn, cols, rows)
 			}
 		}
 	}()
