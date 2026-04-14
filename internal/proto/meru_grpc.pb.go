@@ -19,15 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MeruNode_Ping_FullMethodName         = "/conductor.MeruNode/Ping"
-	MeruNode_Spawn_FullMethodName        = "/conductor.MeruNode/Spawn"
-	MeruNode_Send_FullMethodName         = "/conductor.MeruNode/Send"
-	MeruNode_Stop_FullMethodName         = "/conductor.MeruNode/Stop"
-	MeruNode_GetSession_FullMethodName   = "/conductor.MeruNode/GetSession"
-	MeruNode_ListSessions_FullMethodName = "/conductor.MeruNode/ListSessions"
-	MeruNode_GetLogs_FullMethodName      = "/conductor.MeruNode/GetLogs"
-	MeruNode_ListDir_FullMethodName      = "/conductor.MeruNode/ListDir"
-	MeruNode_GitClone_FullMethodName     = "/conductor.MeruNode/GitClone"
+	MeruNode_Ping_FullMethodName         = "/meru.MeruNode/Ping"
+	MeruNode_Spawn_FullMethodName        = "/meru.MeruNode/Spawn"
+	MeruNode_Send_FullMethodName         = "/meru.MeruNode/Send"
+	MeruNode_Stop_FullMethodName         = "/meru.MeruNode/Stop"
+	MeruNode_GetSession_FullMethodName   = "/meru.MeruNode/GetSession"
+	MeruNode_ListSessions_FullMethodName = "/meru.MeruNode/ListSessions"
+	MeruNode_GetLogs_FullMethodName      = "/meru.MeruNode/GetLogs"
+	MeruNode_ListDir_FullMethodName      = "/meru.MeruNode/ListDir"
+	MeruNode_GitClone_FullMethodName     = "/meru.MeruNode/GitClone"
 )
 
 // MeruNodeClient is the client API for MeruNode service.
@@ -35,7 +35,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // MeruNode is the service exposed by each remote agent node.
-// The control-plane (local Conductor daemon) is the only client.
+// The control-plane (local Meru daemon) is the only client.
 type MeruNodeClient interface {
 	// Ping checks connectivity and returns node capabilities.
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
@@ -170,7 +170,7 @@ func (c *meruNodeClient) GitClone(ctx context.Context, in *GitCloneRequest, opts
 // for forward compatibility.
 //
 // MeruNode is the service exposed by each remote agent node.
-// The control-plane (local Conductor daemon) is the only client.
+// The control-plane (local Meru daemon) is the only client.
 type MeruNodeServer interface {
 	// Ping checks connectivity and returns node capabilities.
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
@@ -408,7 +408,7 @@ func _MeruNode_GitClone_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MeruNode_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "conductor.MeruNode",
+	ServiceName: "meru.MeruNode",
 	HandlerType: (*MeruNodeServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -451,5 +451,5 @@ var MeruNode_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "conductor.proto",
+	Metadata: "meru.proto",
 }

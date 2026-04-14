@@ -1053,21 +1053,22 @@ var File_meru_proto protoreflect.FileDescriptor
 
 const file_meru_proto_rawDesc = "" +
 	"\n" +
-	"\x0fconductor.proto\x12\tconductor\"\a\n" +
+	"\n" +
+	"meru.proto\x12\x04meru\"\a\n" +
 	"\x05Empty\"\r\n" +
 	"\vPingRequest\"\\\n" +
 	"\fPingResponse\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
 	"\x06agents\x18\x02 \x03(\tR\x06agents\x12\x1a\n" +
-	"\bhostname\x18\x03 \x01(\tR\bhostname\"\x93\x02\n" +
+	"\bhostname\x18\x03 \x01(\tR\bhostname\"\x8e\x02\n" +
 	"\fSpawnRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x14\n" +
 	"\x05agent\x18\x02 \x01(\tR\x05agent\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1c\n" +
 	"\tworkspace\x18\x04 \x01(\tR\tworkspace\x12\x14\n" +
-	"\x05model\x18\x05 \x01(\tR\x05model\x122\n" +
-	"\x03env\x18\x06 \x03(\v2 .conductor.SpawnRequest.EnvEntryR\x03env\x12\x1a\n" +
+	"\x05model\x18\x05 \x01(\tR\x05model\x12-\n" +
+	"\x03env\x18\x06 \x03(\v2\x1b.meru.SpawnRequest.EnvEntryR\x03env\x12\x1a\n" +
 	"\bworktree\x18\a \x01(\bR\bworktree\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
@@ -1102,14 +1103,14 @@ const file_meru_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05agent\x18\x03 \x01(\tR\x05agent\x12\x1c\n" +
 	"\tworkspace\x18\x04 \x01(\tR\tworkspace\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\"J\n" +
-	"\x14ListSessionsResponse\x122\n" +
-	"\bsessions\x18\x01 \x03(\v2\x16.conductor.SessionInfoR\bsessions\"/\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\"E\n" +
+	"\x14ListSessionsResponse\x12-\n" +
+	"\bsessions\x18\x01 \x03(\v2\x11.meru.SessionInfoR\bsessions\"/\n" +
 	"\x0eGetLogsRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"B\n" +
-	"\x0fGetLogsResponse\x12/\n" +
-	"\x06events\x18\x01 \x03(\v2\x17.conductor.EventMessageR\x06events\"o\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"=\n" +
+	"\x0fGetLogsResponse\x12*\n" +
+	"\x06events\x18\x01 \x03(\v2\x12.meru.EventMessageR\x06events\"o\n" +
 	"\x0fGitCloneRequest\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x12\n" +
 	"\x04dest\x18\x02 \x01(\tR\x04dest\x12\x1a\n" +
@@ -1122,22 +1123,22 @@ const file_meru_proto_rawDesc = "" +
 	"\bDirEntry\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04path\x18\x02 \x01(\tR\x04path\x12\x15\n" +
-	"\x06is_dir\x18\x03 \x01(\bR\x05isDir\"l\n" +
+	"\x06is_dir\x18\x03 \x01(\bR\x05isDir\"g\n" +
 	"\x0fListDirResponse\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x16\n" +
-	"\x06parent\x18\x02 \x01(\tR\x06parent\x12-\n" +
-	"\aentries\x18\x03 \x03(\v2\x13.conductor.DirEntryR\aentries2\xc8\x04\n" +
-	"\rMeruNode\x127\n" +
-	"\x04Ping\x12\x16.conductor.PingRequest\x1a\x17.conductor.PingResponse\x12:\n" +
-	"\x05Spawn\x12\x17.conductor.SpawnRequest\x1a\x18.conductor.SpawnResponse\x129\n" +
-	"\x04Send\x12\x16.conductor.SendRequest\x1a\x17.conductor.EventMessage0\x01\x127\n" +
-	"\x04Stop\x12\x16.conductor.StopRequest\x1a\x17.conductor.StopResponse\x12B\n" +
+	"\x06parent\x18\x02 \x01(\tR\x06parent\x12(\n" +
+	"\aentries\x18\x03 \x03(\v2\x0e.meru.DirEntryR\aentries2\xe9\x03\n" +
+	"\bMeruNode\x12-\n" +
+	"\x04Ping\x12\x11.meru.PingRequest\x1a\x12.meru.PingResponse\x120\n" +
+	"\x05Spawn\x12\x12.meru.SpawnRequest\x1a\x13.meru.SpawnResponse\x12/\n" +
+	"\x04Send\x12\x11.meru.SendRequest\x1a\x12.meru.EventMessage0\x01\x12-\n" +
+	"\x04Stop\x12\x11.meru.StopRequest\x1a\x12.meru.StopResponse\x128\n" +
 	"\n" +
-	"GetSession\x12\x1c.conductor.GetSessionRequest\x1a\x16.conductor.SessionInfo\x12A\n" +
-	"\fListSessions\x12\x10.conductor.Empty\x1a\x1f.conductor.ListSessionsResponse\x12@\n" +
-	"\aGetLogs\x12\x19.conductor.GetLogsRequest\x1a\x1a.conductor.GetLogsResponse\x12@\n" +
-	"\aListDir\x12\x19.conductor.ListDirRequest\x1a\x1a.conductor.ListDirResponse\x12C\n" +
-	"\bGitClone\x12\x1a.conductor.GitCloneRequest\x1a\x1b.conductor.GitCloneResponseB?Z=github.com/ash-thakur-rh/meru/internal/proto;merupbb\x06proto3"
+	"GetSession\x12\x17.meru.GetSessionRequest\x1a\x11.meru.SessionInfo\x127\n" +
+	"\fListSessions\x12\v.meru.Empty\x1a\x1a.meru.ListSessionsResponse\x126\n" +
+	"\aGetLogs\x12\x14.meru.GetLogsRequest\x1a\x15.meru.GetLogsResponse\x126\n" +
+	"\aListDir\x12\x14.meru.ListDirRequest\x1a\x15.meru.ListDirResponse\x129\n" +
+	"\bGitClone\x12\x15.meru.GitCloneRequest\x1a\x16.meru.GitCloneResponseB5Z3github.com/ash-thakur-rh/meru/internal/proto;merupbb\x06proto3"
 
 var (
 	file_meru_proto_rawDescOnce sync.Once
@@ -1153,50 +1154,50 @@ func file_meru_proto_rawDescGZIP() []byte {
 
 var file_meru_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_meru_proto_goTypes = []any{
-	(*Empty)(nil),                // 0: conductor.Empty
-	(*PingRequest)(nil),          // 1: conductor.PingRequest
-	(*PingResponse)(nil),         // 2: conductor.PingResponse
-	(*SpawnRequest)(nil),         // 3: conductor.SpawnRequest
-	(*SpawnResponse)(nil),        // 4: conductor.SpawnResponse
-	(*SendRequest)(nil),          // 5: conductor.SendRequest
-	(*EventMessage)(nil),         // 6: conductor.EventMessage
-	(*StopRequest)(nil),          // 7: conductor.StopRequest
-	(*StopResponse)(nil),         // 8: conductor.StopResponse
-	(*GetSessionRequest)(nil),    // 9: conductor.GetSessionRequest
-	(*SessionInfo)(nil),          // 10: conductor.SessionInfo
-	(*ListSessionsResponse)(nil), // 11: conductor.ListSessionsResponse
-	(*GetLogsRequest)(nil),       // 12: conductor.GetLogsRequest
-	(*GetLogsResponse)(nil),      // 13: conductor.GetLogsResponse
-	(*GitCloneRequest)(nil),      // 14: conductor.GitCloneRequest
-	(*GitCloneResponse)(nil),     // 15: conductor.GitCloneResponse
-	(*ListDirRequest)(nil),       // 16: conductor.ListDirRequest
-	(*DirEntry)(nil),             // 17: conductor.DirEntry
-	(*ListDirResponse)(nil),      // 18: conductor.ListDirResponse
-	nil,                          // 19: conductor.SpawnRequest.EnvEntry
+	(*Empty)(nil),                // 0: meru.Empty
+	(*PingRequest)(nil),          // 1: meru.PingRequest
+	(*PingResponse)(nil),         // 2: meru.PingResponse
+	(*SpawnRequest)(nil),         // 3: meru.SpawnRequest
+	(*SpawnResponse)(nil),        // 4: meru.SpawnResponse
+	(*SendRequest)(nil),          // 5: meru.SendRequest
+	(*EventMessage)(nil),         // 6: meru.EventMessage
+	(*StopRequest)(nil),          // 7: meru.StopRequest
+	(*StopResponse)(nil),         // 8: meru.StopResponse
+	(*GetSessionRequest)(nil),    // 9: meru.GetSessionRequest
+	(*SessionInfo)(nil),          // 10: meru.SessionInfo
+	(*ListSessionsResponse)(nil), // 11: meru.ListSessionsResponse
+	(*GetLogsRequest)(nil),       // 12: meru.GetLogsRequest
+	(*GetLogsResponse)(nil),      // 13: meru.GetLogsResponse
+	(*GitCloneRequest)(nil),      // 14: meru.GitCloneRequest
+	(*GitCloneResponse)(nil),     // 15: meru.GitCloneResponse
+	(*ListDirRequest)(nil),       // 16: meru.ListDirRequest
+	(*DirEntry)(nil),             // 17: meru.DirEntry
+	(*ListDirResponse)(nil),      // 18: meru.ListDirResponse
+	nil,                          // 19: meru.SpawnRequest.EnvEntry
 }
 var file_meru_proto_depIdxs = []int32{
-	19, // 0: conductor.SpawnRequest.env:type_name -> conductor.SpawnRequest.EnvEntry
-	10, // 1: conductor.ListSessionsResponse.sessions:type_name -> conductor.SessionInfo
-	6,  // 2: conductor.GetLogsResponse.events:type_name -> conductor.EventMessage
-	17, // 3: conductor.ListDirResponse.entries:type_name -> conductor.DirEntry
-	1,  // 4: conductor.MeruNode.Ping:input_type -> conductor.PingRequest
-	3,  // 5: conductor.MeruNode.Spawn:input_type -> conductor.SpawnRequest
-	5,  // 6: conductor.MeruNode.Send:input_type -> conductor.SendRequest
-	7,  // 7: conductor.MeruNode.Stop:input_type -> conductor.StopRequest
-	9,  // 8: conductor.MeruNode.GetSession:input_type -> conductor.GetSessionRequest
-	0,  // 9: conductor.MeruNode.ListSessions:input_type -> conductor.Empty
-	12, // 10: conductor.MeruNode.GetLogs:input_type -> conductor.GetLogsRequest
-	16, // 11: conductor.MeruNode.ListDir:input_type -> conductor.ListDirRequest
-	14, // 12: conductor.MeruNode.GitClone:input_type -> conductor.GitCloneRequest
-	2,  // 13: conductor.MeruNode.Ping:output_type -> conductor.PingResponse
-	4,  // 14: conductor.MeruNode.Spawn:output_type -> conductor.SpawnResponse
-	6,  // 15: conductor.MeruNode.Send:output_type -> conductor.EventMessage
-	8,  // 16: conductor.MeruNode.Stop:output_type -> conductor.StopResponse
-	10, // 17: conductor.MeruNode.GetSession:output_type -> conductor.SessionInfo
-	11, // 18: conductor.MeruNode.ListSessions:output_type -> conductor.ListSessionsResponse
-	13, // 19: conductor.MeruNode.GetLogs:output_type -> conductor.GetLogsResponse
-	18, // 20: conductor.MeruNode.ListDir:output_type -> conductor.ListDirResponse
-	15, // 21: conductor.MeruNode.GitClone:output_type -> conductor.GitCloneResponse
+	19, // 0: meru.SpawnRequest.env:type_name -> meru.SpawnRequest.EnvEntry
+	10, // 1: meru.ListSessionsResponse.sessions:type_name -> meru.SessionInfo
+	6,  // 2: meru.GetLogsResponse.events:type_name -> meru.EventMessage
+	17, // 3: meru.ListDirResponse.entries:type_name -> meru.DirEntry
+	1,  // 4: meru.MeruNode.Ping:input_type -> meru.PingRequest
+	3,  // 5: meru.MeruNode.Spawn:input_type -> meru.SpawnRequest
+	5,  // 6: meru.MeruNode.Send:input_type -> meru.SendRequest
+	7,  // 7: meru.MeruNode.Stop:input_type -> meru.StopRequest
+	9,  // 8: meru.MeruNode.GetSession:input_type -> meru.GetSessionRequest
+	0,  // 9: meru.MeruNode.ListSessions:input_type -> meru.Empty
+	12, // 10: meru.MeruNode.GetLogs:input_type -> meru.GetLogsRequest
+	16, // 11: meru.MeruNode.ListDir:input_type -> meru.ListDirRequest
+	14, // 12: meru.MeruNode.GitClone:input_type -> meru.GitCloneRequest
+	2,  // 13: meru.MeruNode.Ping:output_type -> meru.PingResponse
+	4,  // 14: meru.MeruNode.Spawn:output_type -> meru.SpawnResponse
+	6,  // 15: meru.MeruNode.Send:output_type -> meru.EventMessage
+	8,  // 16: meru.MeruNode.Stop:output_type -> meru.StopResponse
+	10, // 17: meru.MeruNode.GetSession:output_type -> meru.SessionInfo
+	11, // 18: meru.MeruNode.ListSessions:output_type -> meru.ListSessionsResponse
+	13, // 19: meru.MeruNode.GetLogs:output_type -> meru.GetLogsResponse
+	18, // 20: meru.MeruNode.ListDir:output_type -> meru.ListDirResponse
+	15, // 21: meru.MeruNode.GitClone:output_type -> meru.GitCloneResponse
 	13, // [13:22] is the sub-list for method output_type
 	4,  // [4:13] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
