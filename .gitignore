@@ -1,7 +1,7 @@
 # ── Go ────────────────────────────────────────────────────────────────────────
-# Compiled binaries
-meru
-meru-node
+# Compiled binaries (root-level only — anchored so cmd/meru* dirs are not ignored)
+/meru
+/meru-node
 *.exe
 *.exe~
 
