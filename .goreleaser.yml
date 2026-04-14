@@ -69,7 +69,7 @@ archives:
         format: zip
     files:
       - README.md
-      - LICENSE
+      - LICENSE.txt
 
 checksum:
   name_template: checksums.txt
