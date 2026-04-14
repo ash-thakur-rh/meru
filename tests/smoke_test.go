@@ -18,19 +18,6 @@ import (
 	"time"
 )
 
-// buildBinary compiles cmd/meru into a temp directory and returns the path.
-func buildBinary(t *testing.T) string {
-	t.Helper()
-	dir := t.TempDir()
-	out := filepath.Join(dir, "meru")
-	cmd := exec.Command("go", "build", "-o", out, "../cmd/meru")
-	cmd.Dir = filepath.Join(os.Getenv("GOPATH"), "src/github.com/ash-thakur-rh/meru")
-	if b, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("build meru: %v\n%s", err, b)
-	}
-	return out
-}
-
 // freePort picks a random available TCP port.
 func freePort(t *testing.T) int {
 	t.Helper()
