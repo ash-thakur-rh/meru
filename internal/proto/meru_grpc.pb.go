@@ -229,7 +229,7 @@ func (UnimplementedMeruNodeServer) GitClone(context.Context, *GitCloneRequest) (
 	return nil, status.Error(codes.Unimplemented, "method GitClone not implemented")
 }
 func (UnimplementedMeruNodeServer) mustEmbedUnimplementedMeruNodeServer() {}
-func (UnimplementedMeruNodeServer) testEmbeddedByValue()                       {}
+func (UnimplementedMeruNodeServer) testEmbeddedByValue()                  {}
 
 // UnsafeMeruNodeServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to MeruNodeServer will
