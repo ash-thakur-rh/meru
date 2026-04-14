@@ -20,7 +20,7 @@ Give each session its own isolated branch and working directory.
 
 ## Overview
 
-When you spawn a session with `--worktree`, Conductor creates a [git worktree](https://git-scm.com/docs/git-worktree) — a separate checkout of the repository on a new branch. The agent works in this isolated directory, so its changes don't affect your main working tree until you decide to merge them.
+When you spawn a session with `--worktree`, Meru creates a [git worktree](https://git-scm.com/docs/git-worktree) — a separate checkout of the repository on a new branch. The agent works in this isolated directory, so its changes don't affect your main working tree until you decide to merge them.
 
 This is especially useful when:
 - Running multiple agents on the same repo simultaneously
@@ -37,7 +37,7 @@ meru spawn claude \
   --worktree
 ```
 
-Conductor will:
+Meru will:
 1. Detect that `~/projects/myapp` is inside a git repository
 2. Find the repository root
 3. Create a new branch `meru/<session-id>`
@@ -82,7 +82,7 @@ git merge meru/<session-id>
 
 ## Cleanup
 
-When you stop the session, Conductor automatically removes the worktree and its branch:
+When you stop the session, Meru automatically removes the worktree and its branch:
 
 ```bash
 meru stop <session-id>

@@ -17,7 +17,7 @@ nav_order: 10
 
 ## Overview
 
-Conductor sends desktop notifications when a session finishes a task or encounters an error, so you don't have to watch the terminal while long-running agents work.
+Meru sends desktop notifications when a session finishes a task or encounters an error, so you don't have to watch the terminal while long-running agents work.
 
 ---
 
@@ -25,8 +25,8 @@ Conductor sends desktop notifications when a session finishes a task or encounte
 
 | Event | Title | Body | Urgency |
 |-------|-------|------|---------|
-| Task completed | `Conductor — <agent>` | `<session-name> finished` | Normal |
-| Error | `Conductor — Error` | `<session-name>: <error message>` | Critical |
+| Task completed | `Meru — <agent>` | `<session-name> finished` | Normal |
+| Error | `Meru — Error` | `<session-name>: <error message>` | Critical |
 
 ---
 
@@ -61,7 +61,7 @@ Notifications appear in the Windows notification tray. If notifications are supp
 
 ### WSL (Windows Subsystem for Linux)
 
-Conductor detects the WSL environment by reading `/proc/version` and, if it contains `microsoft` or `wsl`, uses the Windows PowerShell binary at:
+Meru detects the WSL environment by reading `/proc/version` and, if it contains `microsoft` or `wsl`, uses the Windows PowerShell binary at:
 
 ```
 /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe

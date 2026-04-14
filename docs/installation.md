@@ -7,7 +7,7 @@ nav_order: 2
 # Installation
 {: .no_toc }
 
-Conductor is a **single self-contained binary** — no database server, no config file, no containers. Download it, run `meru serve`, and everything is live.
+Meru is a **single self-contained binary** — no database server, no config file, no containers. Download it, run `meru serve`, and everything is live.
 {: .fs-5 .fw-300 }
 
 ## Table of contents
@@ -41,26 +41,24 @@ VERSION=v0.1.0
 OS=darwin      # or linux
 ARCH=arm64     # or amd64
 
-curl -fsSL "https://github.com/ash-thakur-rh/meru/releases/download/${VERSION}/conductor_${OS}_${ARCH}.tar.gz" \
+curl -fsSL "https://github.com/ash-thakur-rh/meru/releases/download/${VERSION}/meru_${OS}_${ARCH}.tar.gz" \
   | tar -xz
 
-curl -fsSL "https://github.com/ash-thakur-rh/meru/releases/download/${VERSION}/meru-node_${OS}_${ARCH}.tar.gz" \
-  | tar -xz
-
-# Move to a directory on your PATH
+# Move both binaries to a directory on your PATH
 sudo mv meru meru-node /usr/local/bin/
 ```
 
+Both `meru` and `meru-node` are included in the same archive.
+
 ### Windows
 
-Download the `.zip` archives from the [Releases page](https://github.com/ash-thakur-rh/meru/releases):
+Download the `.zip` archive from the [Releases page](https://github.com/ash-thakur-rh/meru/releases):
 
 ```
-meru_windows_amd64.zip
-meru-node_windows_amd64.zip
+meru_windows_x86_64.zip
 ```
 
-Extract both archives and place the `.exe` files somewhere on your `%PATH%`.
+Extract it and place both `.exe` files somewhere on your `%PATH%`.
 
 ### Verify the installation
 
@@ -89,7 +87,7 @@ Go and Node.js are **not** required when using pre-built binaries. You only need
 
 ## Build from source
 
-Use this approach if you want to build from a specific commit or contribute to Conductor.
+Use this approach if you want to build from a specific commit or contribute to Meru.
 
 ### Requirements
 

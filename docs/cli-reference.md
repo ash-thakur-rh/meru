@@ -21,7 +21,7 @@ These flags apply to every `meru` subcommand:
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--addr` | `http://localhost:8080` | Address of the Conductor daemon |
+| `--addr` | `http://localhost:8080` | Address of the Meru daemon |
 
 ```bash
 meru --addr http://myserver:9000 list
@@ -31,7 +31,7 @@ meru --addr http://myserver:9000 list
 
 ## meru serve
 
-Start the Conductor daemon.
+Start the Meru daemon.
 
 ```bash
 meru serve [flags]

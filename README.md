@@ -36,21 +36,19 @@ That's it. Sessions, streaming, broadcast, remote nodes, git clone, web dashboar
 
 ## Architecture
 
-```
-┌──────────────────────────────────────┐
-│             meru (daemon)         │
-│                                      │
-│  CLI ──► REST API ──► Session Mgr   │
-│               │            │         │
-│           Web UI       SQLite DB     │
-│                            │         │
-│                       Node Registry  │
-│                       /           \  │
-│              LocalNode          GRPCNode
-│                 │                   │
-│           Agent adapters     meru-node
-│    (claude/aider/opencode/goose)   (remote)
-└──────────────────────────────────────┘
+```mermaid
+graph TD
+    CLI["CLI / Web UI"] --> API["REST API"]
+    API --> SM["Session Manager"]
+    SM --> DB[("SQLite DB")]
+    SM --> NR["Node Registry"]
+    NR --> LN["LocalNode"]
+    NR --> GN["GRPCNode"]
+    LN --> A1["claude"]
+    LN --> A2["aider"]
+    LN --> A3["opencode"]
+    LN --> A4["goose"]
+    GN -->|"gRPC + auth"| RN["meru-node (remote)"]
 ```
 
 The control plane (`meru`) manages sessions and persists state. Agent work runs either locally via the registered adapters or on remote machines via the `meru-node` daemon, which the control plane talks to over gRPC.
@@ -78,7 +76,7 @@ The control plane (`meru`) manages sessions and persists state. Agent work runs 
 ```bash
 # macOS (Apple Silicon)
 curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_darwin_arm64.tar.gz | tar -xz
-sudo mv meru /usr/local/bin/
+sudo mv meru meru-node /usr/local/bin/
 
 # Start the daemon
 meru serve

@@ -23,14 +23,18 @@ A **session** is a long-lived conversation with an agent. It has a workspace dir
 
 ## Session lifecycle
 
-```
- spawn
-   │
-   ▼
- idle ──► busy ──► waiting ──► busy
-   │         └──────────────────►idle
-   ▼ (stop)
- stopped
+```mermaid
+stateDiagram-v2
+    [*] --> idle: spawn
+    idle --> busy: send prompt
+    busy --> waiting: agent pauses for input
+    waiting --> busy: user responds
+    busy --> idle: done
+    idle --> stopped: stop
+    busy --> stopped: stop
+    waiting --> stopped: stop
+    stopped --> [*]
+    busy --> error: unrecoverable failure
 ```
 
 | Status | Meaning |
@@ -263,7 +267,7 @@ Stopped sessions can be re-spawned from the web UI (hover a stopped card → **r
 
 ## Auto-generated names
 
-If you don't provide `--name`, Conductor generates one automatically in the format `<agent>-<8-char-uuid>` (e.g., `claude-a1b2c3d4`).
+If you don't provide `--name`, Meru generates one automatically in the format `<agent>-<8-char-uuid>` (e.g., `claude-a1b2c3d4`).
 
 ---
 

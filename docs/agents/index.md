@@ -8,7 +8,7 @@ has_children: true
 # Agents
 {: .no_toc }
 
-Conductor supports multiple AI coding agent backends through a common adapter interface. Each adapter translates Conductor's session lifecycle into the commands and APIs that the underlying agent CLI expects.
+Meru supports multiple AI coding agent backends through a common adapter interface. Each adapter translates Meru's session lifecycle into the commands and APIs that the underlying agent CLI expects.
 
 All CLI-based adapters run the agent under a **PTY** (pseudo-terminal) so that the full terminal output — colours, progress spinners, diffs, tool-use animations — streams to the client in real time. xterm.js in the web UI renders this output natively, and keystrokes typed in the browser are forwarded directly to the agent's PTY stdin. The result is a fully interactive session indistinguishable from running the agent in your local terminal.
 
@@ -61,6 +61,26 @@ All four adapters use the same pattern:
 3. **Bidirectional** — keystrokes from the browser are written directly to PTY stdin via `WriteInput`. Resize events update the PTY window size via `ResizePTY`.
 4. **Waiting detection** — after each chunk the adapter checks the last 300 bytes of output for approval-prompt patterns (`(y/n)`, `[y/n]`, `press enter`, etc.). If detected, the session status transitions to `waiting` so the dashboard can highlight it. Status clears back to `busy` when the user types.
 5. **Log accumulation** — all PTY bytes are also written to an in-memory log buffer, accessible via `meru logs` and replayed to new terminal WebSocket connections.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Meru Session
+    participant P as PTY
+    participant A as Agent CLI
+
+    C->>S: Send(prompt)
+    S->>P: WriteInput(prompt)
+    P->>A: stdin
+    loop Output streaming
+        A->>P: stdout/stderr
+        P->>S: read loop (4 KB chunks)
+        S->>C: EventText
+    end
+    A->>P: exit
+    P->>S: EOF
+    S->>C: EventDone
+```
 
 ---
 

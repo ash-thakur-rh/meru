@@ -58,7 +58,7 @@ There is currently no configuration file — all settings are passed via flags o
 
 ## Environment variables
 
-Conductor itself does not read environment variables for its own configuration. However, you can pass extra environment variables **to the agent process** when spawning a session:
+Meru itself does not read environment variables for its own configuration. However, you can pass extra environment variables **to the agent process** when spawning a session:
 
 ```bash
 # Via CLI (not yet exposed as a flag — use the API directly)
@@ -164,7 +164,7 @@ Create `/etc/systemd/system/meru.service`:
 
 ```ini
 [Unit]
-Description=Conductor AI Agent Orchestrator
+Description=Meru AI Agent Orchestrator
 After=network.target
 
 [Service]

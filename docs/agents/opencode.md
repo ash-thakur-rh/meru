@@ -70,13 +70,13 @@ Output streams back in real time via a PTY, including OpenCode's tool-use displa
 
 ## Multi-turn conversations
 
-The adapter passes the Conductor session ID as OpenCode's `--session` flag on the first call:
+The adapter passes the Meru session ID as OpenCode's `--session` flag on the first call:
 
 ```bash
 opencode run "<prompt>" --session <meru-session-id> [--model <model>]
 ```
 
-Subsequent calls use `--continue <session-id>` to resume the same OpenCode session, so the model remembers prior context. As long as the Conductor session is alive, OpenCode continues from where it left off.
+Subsequent calls use `--continue <session-id>` to resume the same OpenCode session, so the model remembers prior context. As long as the Meru session is alive, OpenCode continues from where it left off.
 
 ---
 

@@ -17,7 +17,7 @@ nav_order: 11
 
 ## Overview
 
-Conductor ships with a built-in web dashboard served directly from the daemon. No separate server or installation is required.
+Meru ships with a built-in web dashboard served directly from the daemon. No separate server or installation is required.
 
 Access it at [http://localhost:8080](http://localhost:8080) after starting `meru serve`.
 
@@ -89,7 +89,7 @@ Expand the **Clone from git repository** section to clone a repo on the fly befo
 1. Enter the **Repository URL** (HTTPS or SSH).
 2. Optionally set a **Clone to** destination path (defaults to `~/meru-workspaces/<repo>`). Click 📂 to browse.
 3. For private HTTPS repos, expand **Private repository credentials** and enter your username and personal access token.
-4. Click **Spawn** — Conductor clones the repo first, then spawns the agent in the cloned directory.
+4. Click **Spawn** — Meru clones the repo first, then spawns the agent in the cloned directory.
 
 SSH repos use your local key agent automatically; no credentials are needed in the UI.
 

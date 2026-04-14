@@ -71,13 +71,13 @@ Output streams back in real time via a PTY, including Goose's tool-use display a
 
 ## Multi-turn conversations
 
-The adapter passes the Conductor session ID as Goose's `--name` flag on the first invocation:
+The adapter passes the Meru session ID as Goose's `--name` flag on the first invocation:
 
 ```bash
 goose run --text "<prompt>" --name <meru-session-id> [--model <model>]
 ```
 
-Subsequent calls reuse the same `--name`, so Goose resumes its session and remembers prior context. As long as the Conductor session is alive, Goose continues from where it left off.
+Subsequent calls reuse the same `--name`, so Goose resumes its session and remembers prior context. As long as the Meru session is alive, Goose continues from where it left off.
 
 ---
 

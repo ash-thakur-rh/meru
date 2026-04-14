@@ -20,23 +20,25 @@ Up and running in under two minutes.
 
 ## Step 1 — Download and run
 
-Conductor is a single binary. Download it, run it, and you're done with setup.
+Meru is a single binary. Download it, run it, and you're done with setup.
 
 ```bash
 # macOS (Apple Silicon)
 curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_darwin_arm64.tar.gz \
-  | tar -xz && sudo mv meru /usr/local/bin/
+  | tar -xz && sudo mv meru meru-node /usr/local/bin/
 
 # macOS (Intel)
-curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_darwin_amd64.tar.gz \
-  | tar -xz && sudo mv meru /usr/local/bin/
+curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_darwin_x86_64.tar.gz \
+  | tar -xz && sudo mv meru meru-node /usr/local/bin/
 
 # Linux (x86-64)
-curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_linux_amd64.tar.gz \
-  | tar -xz && sudo mv meru /usr/local/bin/
+curl -fsSL https://github.com/ash-thakur-rh/meru/releases/latest/download/meru_linux_x86_64.tar.gz \
+  | tar -xz && sudo mv meru meru-node /usr/local/bin/
 ```
 
-> **Windows?** Download `meru_windows_amd64.zip` from the [Releases page](https://github.com/ash-thakur-rh/meru/releases) and place the `.exe` on your `%PATH%`.
+Each archive contains both `meru` (control plane) and `meru-node` (remote node daemon).
+
+> **Windows?** Download `meru_windows_x86_64.zip` from the [Releases page](https://github.com/ash-thakur-rh/meru/releases) and place both `.exe` files on your `%PATH%`.
 
 See [Installation](./installation) for the full list of platforms and a build-from-source option.
 
@@ -51,7 +53,7 @@ meru serve
 You'll see:
 
 ```
-Conductor listening on :8080
+meru listening on :8080
   API: http://localhost:8080
   UI:  http://localhost:8080
   DB:  /Users/you/.meru/meru.db
@@ -63,13 +65,13 @@ Conductor listening on :8080
 
 ## Step 3 — Open the web dashboard
 
-Navigate to [http://localhost:8080](http://localhost:8080). The Conductor dashboard shows your sessions and lets you spawn new ones without touching the CLI.
+Navigate to [http://localhost:8080](http://localhost:8080). The Meru dashboard shows your sessions and lets you spawn new ones without touching the CLI.
 
 ---
 
 ## Step 4 — Install an agent CLI
 
-Conductor orchestrates agent CLIs you already have installed. Install at least one:
+Meru orchestrates agent CLIs you already have installed. Install at least one:
 
 | Agent | Install |
 |-------|---------|
@@ -136,5 +138,5 @@ Everything above required zero configuration. When you're ready for more:
 | [Broadcast](./broadcast) | Fan out one prompt to all running agents at once |
 | [Remote Nodes](./remote-nodes) | Spawn agents on remote machines over gRPC |
 | [Web Dashboard](./web-ui) | Clone repos from the UI, browse filesystems, manage nodes |
-| [REST API](./api-reference) | Integrate Conductor into scripts and your own tools |
+| [REST API](./api-reference) | Integrate Meru into scripts and your own tools |
 | [CLI Reference](./cli-reference) | Every command and flag |

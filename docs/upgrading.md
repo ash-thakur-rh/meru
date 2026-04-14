@@ -79,7 +79,7 @@ cp ~/.meru/meru.db ~/.meru/meru.db.bak
 
 ## Upgrading agent CLIs
 
-Conductor adapters call agent CLIs at runtime. Upgrade them independently:
+Meru adapters call agent CLIs at runtime. Upgrade them independently:
 
 ```bash
 # Claude Code
@@ -89,7 +89,7 @@ npm update -g @anthropic-ai/claude-code
 pip install --upgrade aider-chat
 ```
 
-No Conductor restart is needed after upgrading agent CLIs — they are invoked fresh for each `Send` call.
+No Meru restart is needed after upgrading agent CLIs — they are invoked fresh for each `Send` call.
 
 ---
 

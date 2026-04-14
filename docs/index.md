@@ -16,7 +16,7 @@ Orchestrate multiple AI coding agents — **Claude Code**, **Aider**, **OpenCode
 
 ## Zero setup. Just run it.
 
-Conductor is a **single self-contained binary**. There is no database server to start, no config file to write, no container to run. Download it, run one command, and your web dashboard and REST API are live.
+Meru is a **single self-contained binary**. There is no database server to start, no config file to write, no container to run. Download it, run one command, and your web dashboard and REST API are live.
 
 ```bash
 meru serve
@@ -28,23 +28,23 @@ Open [http://localhost:8080](http://localhost:8080) and start spawning agents. E
 
 ---
 
-## What is Conductor?
+## What is Meru?
 
-Conductor is a lightweight orchestration layer that sits between you and your AI coding agents. Spawn sessions, stream responses, broadcast prompts to many agents at once, and manage everything through a REST API, a CLI, or the built-in web dashboard.
+Meru is a lightweight orchestration layer that sits between you and your AI coding agents. Spawn sessions, stream responses, broadcast prompts to many agents at once, and manage everything through a REST API, a CLI, or the built-in web dashboard.
 
-```
-┌──────────────────────────────────────────┐
-│              meru  (daemon)           │
-│                                          │
-│  CLI / Web UI ──► REST API ──► Session  │
-│                                    │     │
-│                               Node Reg  │
-│                              /         \ │
-│                        LocalNode   GRPCNode
-│                            │              │
-│                      Agent adapters  meru-node
-│              (claude / aider / opencode / goose)  (remote)
-└──────────────────────────────────────────┘
+```mermaid
+graph TD
+    UI["CLI / Web UI"] --> API["REST API"]
+    API --> SM["Session Manager"]
+    SM --> DB[("SQLite DB")]
+    SM --> NR["Node Registry"]
+    NR --> LN["LocalNode"]
+    NR --> GN["GRPCNode"]
+    LN --> A1["claude"]
+    LN --> A2["aider"]
+    LN --> A3["opencode"]
+    LN --> A4["goose"]
+    GN -->|gRPC| RN["meru-node (remote)"]
 ```
 
 ---

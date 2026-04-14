@@ -7,7 +7,7 @@ nav_order: 8
 # Remote Nodes
 {: .no_toc }
 
-Spawn agents on remote machines and manage them from your local Conductor instance.
+Spawn agents on remote machines and manage them from your local Meru instance.
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -20,14 +20,17 @@ Spawn agents on remote machines and manage them from your local Conductor instan
 
 ## Overview
 
-Conductor uses a control-plane / node architecture. The **control plane** (`meru serve`) manages sessions and exposes the API. **Nodes** are machines where agent processes actually run. There is always one built-in `local` node on the control plane itself. Additional remote nodes run the `meru-node` daemon and communicate with the control plane over gRPC.
+Meru uses a control-plane / node architecture. The **control plane** (`meru serve`) manages sessions and exposes the API. **Nodes** are machines where agent processes actually run. There is always one built-in `local` node on the control plane itself. Additional remote nodes run the `meru-node` daemon and communicate with the control plane over gRPC.
 
-```
-Your machine                    Remote machine
-─────────────                   ──────────────
-meru serve                 meru-node serve
-   │                               │
-   └──── gRPC (Bearer token) ──────┘
+```mermaid
+graph LR
+    subgraph local["Your machine"]
+        CP["meru serve\n(control plane)"]
+    end
+    subgraph remote["Remote machine"]
+        N["meru-node serve"]
+    end
+    CP -->|"gRPC + Bearer token"| N
 ```
 
 ---
