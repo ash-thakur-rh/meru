@@ -18,7 +18,7 @@ import (
 // TaskDone fires a desktop notification when a session finishes a task.
 func TaskDone(sessionName, agentName string) {
 	send(
-		fmt.Sprintf("Conductor — %s", sessionName),
+		fmt.Sprintf("Meru — %s", sessionName),
 		fmt.Sprintf("%s finished a task", agentName),
 		levelNormal,
 	)
@@ -28,7 +28,7 @@ func TaskDone(sessionName, agentName string) {
 // user approval or input (e.g. a y/n prompt or a "Do you want to proceed?" question).
 func WaitingForInput(sessionName, agentName string) {
 	send(
-		fmt.Sprintf("Conductor — %s", sessionName),
+		fmt.Sprintf("Meru — %s", sessionName),
 		fmt.Sprintf("%s is waiting for your input", agentName),
 		levelCritical,
 	)
@@ -37,7 +37,7 @@ func WaitingForInput(sessionName, agentName string) {
 // Error fires a desktop notification for a session error.
 func Error(sessionName, msg string) {
 	send(
-		fmt.Sprintf("Conductor — %s", sessionName),
+		fmt.Sprintf("Meru — %s", sessionName),
 		fmt.Sprintf("Error: %s", msg),
 		levelCritical,
 	)
@@ -95,7 +95,7 @@ $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 [Windows.Data.Xml.Dom.XmlDocument,Windows.Data.Xml.Dom.XmlDocument,ContentType=WindowsRuntime] | Out-Null
 $xml.LoadXml('%s')
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Conductor').Show($toast)
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Meru').Show($toast)
 `, strings.ReplaceAll(xml, "'", "''")) // escape single quotes for PowerShell
 
 	exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", script).Start() //nolint:errcheck
@@ -122,7 +122,7 @@ $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 [Windows.Data.Xml.Dom.XmlDocument,Windows.Data.Xml.Dom.XmlDocument,ContentType=WindowsRuntime] | Out-Null
 $xml.LoadXml('%s')
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Conductor').Show($toast)
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Meru').Show($toast)
 `, strings.ReplaceAll(xml, "'", "''"))
 
 	exec.Command(ps, "-NoProfile", "-NonInteractive", "-Command", script).Start() //nolint:errcheck
@@ -142,7 +142,7 @@ func sendLinux(title, body string, level urgency) {
 		exec.Command(path,
 			"--urgency", urgencyStr,
 			"--expire-time", "6000", // ms
-			"--app-name", "Conductor",
+			"--app-name", "Meru",
 			title, body,
 		).Start() //nolint:errcheck
 		return
