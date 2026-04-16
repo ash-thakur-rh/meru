@@ -56,6 +56,7 @@ export interface SpawnParams {
   model?: string;
   worktree?: boolean;
   node?: string;
+  branch_name?: string;
 }
 
 const BASE = ""; // same-origin; vite proxy handles /sessions in dev

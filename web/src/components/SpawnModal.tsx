@@ -31,6 +31,8 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
 
   // Worktree state
   const [worktree, setWorktree] = useState(false);
+  const [branchName, setBranchName] = useState("");
+  const [branchEdited, setBranchEdited] = useState(false);
 
   // Submission state
   const [cloning, setCloning] = useState(false);
@@ -46,6 +48,15 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
   }, []);
 
   const set = (k: keyof SpawnParams, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+  function slugify(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50)
+      .replace(/-+$/, "");
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -86,6 +97,7 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
         workspace,
         model: model || undefined,
         worktree,
+        branch_name: worktree && branchName ? branchName : undefined,
       });
       onSpawned();
       onClose();
@@ -158,7 +170,12 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
           <input
             type="text"
             value={form.name ?? ""}
-            onChange={(e) => set("name", e.target.value)}
+            onChange={(e) => {
+              set("name", e.target.value);
+              if (!branchEdited) {
+                setBranchName(slugify(e.target.value));
+              }
+            }}
             placeholder="auto-generated"
             className={inputCls}
           />
@@ -332,6 +349,29 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
             </div>
           </label>
         </div>
+
+        {worktree && (
+          <label className="block mb-4">
+            <span className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">
+              Branch name{" "}
+              <span className="text-slate-400 dark:text-slate-600">(optional)</span>
+            </span>
+            <input
+              type="text"
+              value={branchName}
+              onChange={(e) => {
+                setBranchName(e.target.value);
+                setBranchEdited(e.target.value !== "");
+              }}
+              placeholder={form.name ? slugify(form.name) : "auto-derived from session name"}
+              className={inputCls}
+            />
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              Branch will be created as{" "}
+              <code className="font-mono">meru/{branchName || slugify(form.name ?? "") || "…"}</code>
+            </p>
+          </label>
+        )}
 
         {loading && (
           <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
