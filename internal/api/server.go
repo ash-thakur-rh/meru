@@ -89,13 +89,14 @@ func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 
 // POST /sessions
 type spawnRequest struct {
-	Agent     string            `json:"agent"`
-	Name      string            `json:"name"`
-	Workspace string            `json:"workspace"`
-	Model     string            `json:"model"`
-	Env       map[string]string `json:"env"`
-	Worktree  bool              `json:"worktree"`
-	Node      string            `json:"node"`
+	Agent      string            `json:"agent"`
+	Name       string            `json:"name"`
+	Workspace  string            `json:"workspace"`
+	Model      string            `json:"model"`
+	Env        map[string]string `json:"env"`
+	Worktree   bool              `json:"worktree"`
+	Node       string            `json:"node"`
+	BranchName string            `json:"branch_name"`
 }
 
 func (s *Server) handleSpawn(w http.ResponseWriter, r *http.Request) {
@@ -113,12 +114,13 @@ func (s *Server) handleSpawn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess, err := s.mgr.Spawn(r.Context(), req.Agent, agent.SpawnConfig{
-		Name:      req.Name,
-		Workspace: req.Workspace,
-		Model:     req.Model,
-		Env:       req.Env,
-		Worktree:  req.Worktree,
-		NodeName:  req.Node,
+		Name:       req.Name,
+		Workspace:  req.Workspace,
+		Model:      req.Model,
+		Env:        req.Env,
+		Worktree:   req.Worktree,
+		NodeName:   req.Node,
+		BranchName: req.BranchName,
 	})
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
