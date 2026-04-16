@@ -342,7 +342,6 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
                   </label>
                 </div>
               )}
-
             </div>
           )}
         </div>
@@ -395,8 +394,7 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
         {worktree && (
           <label className="block mb-4">
             <span className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">
-              Branch name{" "}
-              <span className="text-slate-400 dark:text-slate-600">(optional)</span>
+              Branch name <span className="text-slate-400 dark:text-slate-600">(optional)</span>
             </span>
             <input
               type="text"
@@ -410,7 +408,9 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
             />
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
               Branch will be created as{" "}
-              <code className="font-mono">meru/{branchName || slugify(form.name ?? "") || "…"}</code>
+              <code className="font-mono">
+                meru/{branchName || slugify(form.name ?? "") || "…"}
+              </code>
             </p>
           </label>
         )}
