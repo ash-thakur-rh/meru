@@ -58,6 +58,7 @@ message SpawnRequest {
   string model      = 5;
   map<string, string> env = 6;
   bool   worktree   = 7;  // create an isolated git worktree on the node before spawning
+  string branch_name = 8; // branch slug for the worktree; meru/<branch_name> will be the branch
 }
 
 message SpawnResponse {
