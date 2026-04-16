@@ -522,21 +522,43 @@ func TestGitClone_Success(t *testing.T) {
 	src := initAPITestRepo(t)
 	dest := filepath.Join(t.TempDir(), "cloned")
 
+	// POST starts the job and returns 202 with a jobId.
 	resp := postJSON(t, ts.URL+"/git/clone", map[string]any{
 		"url":  src,
 		"dest": dest,
 		"node": "local",
 	})
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusAccepted {
 		body, _ := io.ReadAll(resp.Body)
 		t.Fatalf("status = %d, body = %s", resp.StatusCode, body)
 	}
 
-	var result map[string]string
-	decode(t, resp, &result)
-	if result["path"] != dest {
-		t.Errorf("path = %q, want %q", result["path"], dest)
+	var jobResp map[string]string
+	decode(t, resp, &jobResp)
+	jobID := jobResp["jobId"]
+	if jobID == "" {
+		t.Fatal("expected jobId in response")
+	}
+
+	// Stream SSE events until we receive a "done" event.
+	streamURL := fmt.Sprintf("%s/git/clone/%s/stream", ts.URL, jobID)
+	streamResp, err := http.Get(streamURL)
+	if err != nil {
+		t.Fatalf("GET stream: %v", err)
+	}
+	defer streamResp.Body.Close()
+	if streamResp.StatusCode != http.StatusOK {
+		t.Fatalf("stream status = %d, want 200", streamResp.StatusCode)
+	}
+
+	body, err := io.ReadAll(streamResp.Body)
+	if err != nil {
+		t.Fatalf("read stream: %v", err)
+	}
+	rawSSE := string(body)
+	if !strings.Contains(rawSSE, "event: done") {
+		t.Fatalf("expected 'done' event in SSE stream, got: %s", rawSSE)
 	}
 	if _, err := os.Stat(filepath.Join(dest, "file.txt")); err != nil {
 		t.Errorf("cloned file not found: %v", err)
@@ -561,8 +583,28 @@ func TestGitClone_InvalidSource(t *testing.T) {
 		"dest": filepath.Join(t.TempDir(), "clone"),
 	})
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusInternalServerError {
-		t.Errorf("status = %d, want 500", resp.StatusCode)
+	// With the async API the job is accepted immediately; errors surface via the SSE stream.
+	if resp.StatusCode != http.StatusAccepted {
+		t.Errorf("status = %d, want 202", resp.StatusCode)
+	}
+
+	var jobResp map[string]string
+	decode(t, resp, &jobResp)
+	jobID := jobResp["jobId"]
+	if jobID == "" {
+		t.Fatal("expected jobId in response")
+	}
+
+	// Stream until completion and verify an error event is sent.
+	streamURL := fmt.Sprintf("%s/git/clone/%s/stream", ts.URL, jobID)
+	streamResp, err := http.Get(streamURL)
+	if err != nil {
+		t.Fatalf("GET stream: %v", err)
+	}
+	defer streamResp.Body.Close()
+	body, _ := io.ReadAll(streamResp.Body)
+	if !strings.Contains(string(body), "event: error") {
+		t.Errorf("expected 'error' event in SSE stream, got: %s", body)
 	}
 }
 
