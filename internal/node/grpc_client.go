@@ -68,13 +68,14 @@ func (g *GRPCNode) Ping(ctx context.Context) (*Info, error) {
 // Spawn creates a session on the remote node.
 func (g *GRPCNode) Spawn(ctx context.Context, sessionID string, agentName string, cfg agent.SpawnConfig) (agent.Session, error) {
 	req := &pb.SpawnRequest{
-		SessionId: sessionID,
-		Agent:     agentName,
-		Name:      cfg.Name,
-		Workspace: cfg.Workspace,
-		Model:     cfg.Model,
-		Env:       cfg.Env,
-		Worktree:  cfg.Worktree,
+		SessionId:  sessionID,
+		Agent:      agentName,
+		Name:       cfg.Name,
+		Workspace:  cfg.Workspace,
+		Model:      cfg.Model,
+		Env:        cfg.Env,
+		Worktree:   cfg.Worktree,
+		BranchName: cfg.BranchName,
 	}
 
 	resp, err := g.client.Spawn(ctx, req)

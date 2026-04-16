@@ -161,7 +161,8 @@ type SpawnRequest struct {
 	Workspace     string                 `protobuf:"bytes,4,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	Model         string                 `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty"`
 	Env           map[string]string      `protobuf:"bytes,6,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Worktree      bool                   `protobuf:"varint,7,opt,name=worktree,proto3" json:"worktree,omitempty"` // create an isolated git worktree on the node before spawning
+	Worktree      bool                   `protobuf:"varint,7,opt,name=worktree,proto3" json:"worktree,omitempty"`                      // create an isolated git worktree on the node before spawning
+	BranchName    string                 `protobuf:"bytes,8,opt,name=branch_name,json=branchName,proto3" json:"branch_name,omitempty"` // branch slug for the worktree; meru/<branch_name> will be the branch
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -243,6 +244,13 @@ func (x *SpawnRequest) GetWorktree() bool {
 		return x.Worktree
 	}
 	return false
+}
+
+func (x *SpawnRequest) GetBranchName() string {
+	if x != nil {
+		return x.BranchName
+	}
+	return ""
 }
 
 type SpawnResponse struct {
@@ -1060,7 +1068,7 @@ const file_meru_proto_rawDesc = "" +
 	"\fPingResponse\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
 	"\x06agents\x18\x02 \x03(\tR\x06agents\x12\x1a\n" +
-	"\bhostname\x18\x03 \x01(\tR\bhostname\"\x8e\x02\n" +
+	"\bhostname\x18\x03 \x01(\tR\bhostname\"\xaf\x02\n" +
 	"\fSpawnRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x14\n" +
@@ -1069,7 +1077,9 @@ const file_meru_proto_rawDesc = "" +
 	"\tworkspace\x18\x04 \x01(\tR\tworkspace\x12\x14\n" +
 	"\x05model\x18\x05 \x01(\tR\x05model\x12-\n" +
 	"\x03env\x18\x06 \x03(\v2\x1b.meru.SpawnRequest.EnvEntryR\x03env\x12\x1a\n" +
-	"\bworktree\x18\a \x01(\bR\bworktree\x1a6\n" +
+	"\bworktree\x18\a \x01(\bR\bworktree\x12\x1f\n" +
+	"\vbranch_name\x18\b \x01(\tR\n" +
+	"branchName\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"`\n" +

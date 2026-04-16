@@ -70,8 +70,13 @@ func (h *nodeHandler) Spawn(_ context.Context, req *pb.SpawnRequest) (*pb.SpawnR
 			if err := os.MkdirAll(worktreeDir, 0o755); err != nil {
 				return nil, status.Errorf(codes.Internal, "create worktrees dir: %v", err)
 			}
+			// Use the session ID as the unique directory name; use BranchName for the branch.
 			worktreePath := filepath.Join(worktreeDir, req.SessionId)
-			branch := "meru/" + req.SessionId
+			branchSlug := req.BranchName
+			if branchSlug == "" {
+				branchSlug = req.SessionId[:8]
+			}
+			branch := "meru/" + branchSlug
 			addCmd := exec.Command("git", "-C", workspace,
 				"worktree", "add", "-b", branch, worktreePath, "HEAD")
 			if out, err := addCmd.CombinedOutput(); err != nil {

@@ -1,8 +1,8 @@
 // Package workspace manages isolated git worktrees for agent sessions.
 //
 // When a session is spawned with --worktree, meru:
-//  1. Creates a new git worktree branch: meru/<session-id>
-//  2. Checks it out into <base-repo>/.meru-worktrees/<session-id>
+//  1. Creates a new git worktree branch: meru/<branch-slug>
+//  2. Checks it out into <base-repo>/.meru-worktrees/<worktree-id>
 //  3. Returns that path as the agent's workspace
 //
 // On session stop, the worktree is removed.
@@ -26,8 +26,9 @@ type Manager struct{}
 func New() *Manager { return &Manager{} }
 
 // CreateWorktree creates a new git worktree for the session and returns its path.
-// repoPath must be the root of a git repository.
-func (m *Manager) CreateWorktree(repoPath, sessionID string) (string, error) {
+// worktreeID is used for the worktree directory name (must be unique).
+// branchSlug is the human-readable part of the git branch name (meru/<branchSlug>).
+func (m *Manager) CreateWorktree(repoPath, worktreeID, branchSlug string) (string, error) {
 	if !IsGitRepo(repoPath) {
 		return "", fmt.Errorf("%s is not a git repository", repoPath)
 	}
@@ -37,8 +38,8 @@ func (m *Manager) CreateWorktree(repoPath, sessionID string) (string, error) {
 		return "", fmt.Errorf("create worktrees dir: %w", err)
 	}
 
-	worktreePath := filepath.Join(worktreesRoot, sessionID)
-	branch := "meru/" + sessionID
+	worktreePath := filepath.Join(worktreesRoot, worktreeID)
+	branch := "meru/" + branchSlug
 
 	// Create orphan branch from current HEAD, then add worktree
 	out, err := git(repoPath, "worktree", "add", "-b", branch, worktreePath, "HEAD")
@@ -50,9 +51,11 @@ func (m *Manager) CreateWorktree(repoPath, sessionID string) (string, error) {
 }
 
 // RemoveWorktree deletes the worktree and its branch.
-func (m *Manager) RemoveWorktree(repoPath, sessionID string) error {
-	worktreePath := filepath.Join(repoPath, worktreeDir, sessionID)
-	branch := "meru/" + sessionID
+// worktreeID must match the ID used in CreateWorktree.
+// branchSlug must match the slug used in CreateWorktree.
+func (m *Manager) RemoveWorktree(repoPath, worktreeID, branchSlug string) error {
+	worktreePath := filepath.Join(repoPath, worktreeDir, worktreeID)
+	branch := "meru/" + branchSlug
 
 	// Force-remove the worktree
 	out, err := git(repoPath, "worktree", "remove", "--force", worktreePath)

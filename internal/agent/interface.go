@@ -45,12 +45,13 @@ const (
 
 // SpawnConfig holds parameters for starting an agent session.
 type SpawnConfig struct {
-	Name      string            // human-readable session name
-	Workspace string            // working directory for the agent
-	Model     string            // model to use (if agent supports selection)
-	Env       map[string]string // extra env vars
-	Worktree  bool              // create an isolated git worktree for this session (local node only)
-	NodeName  string            // target node; empty means "local"
+	Name       string            // human-readable session name
+	Workspace  string            // working directory for the agent
+	Model      string            // model to use (if agent supports selection)
+	Env        map[string]string // extra env vars
+	Worktree   bool              // create an isolated git worktree for this session (local node only)
+	NodeName   string            // target node; empty means "local"
+	BranchName string            // git branch slug for the worktree; auto-derived from Name if empty
 }
 
 // Capabilities describes what an agent supports.

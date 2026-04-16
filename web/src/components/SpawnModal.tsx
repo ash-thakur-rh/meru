@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
 import { api, type SpawnParams, type NodeInfo } from "../api";
 import { FileBrowser } from "./FileBrowser";
 
@@ -29,12 +29,19 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
   const [gitPassword, setGitPassword] = useState("");
   const [showCreds, setShowCreds] = useState(false);
 
+  // Async clone progress state
+  const [cloneJobId, setCloneJobId] = useState<string | null>(null);
+  const [cloneLines, setCloneLines] = useState<string[]>([]);
+  const [clonePct, setClonePct] = useState(0);
+  const [cloneError, setCloneError] = useState("");
+  const cloneESRef = useRef<EventSource | null>(null);
+
   // Worktree state
   const [worktree, setWorktree] = useState(false);
+  const [branchName, setBranchName] = useState("");
+  const [branchEdited, setBranchEdited] = useState(false);
 
   // Submission state
-  const [cloning, setCloning] = useState(false);
-  const [cloneError, setCloneError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -46,6 +53,15 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
   }, []);
 
   const set = (k: keyof SpawnParams, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+  function slugify(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50)
+      .replace(/-+$/, "");
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -60,22 +76,50 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
         setCloneError("Git URL is required when cloning is enabled.");
         return;
       }
-      setCloning(true);
+
       try {
-        const result = await api.gitClone({
+        const { jobId } = await api.gitClone({
           url: gitURL.trim(),
           dest: gitDest.trim() || undefined,
           node: form.node || undefined,
           username: gitUsername || undefined,
           password: gitPassword || undefined,
         });
-        workspace = result.path;
+
+        setCloneJobId(jobId);
+        setCloneLines([]);
+        setClonePct(0);
+
+        workspace = await new Promise<string>((resolve, reject) => {
+          const es = api.cloneStream(jobId);
+          cloneESRef.current = es;
+
+          es.addEventListener("log", (ev) => {
+            const data = JSON.parse((ev as MessageEvent).data) as { line: string; pct: number };
+            setCloneLines((prev) => [...prev, data.line]);
+            if (data.pct > 0) setClonePct(data.pct);
+          });
+
+          es.addEventListener("done", (ev) => {
+            const data = JSON.parse((ev as MessageEvent).data) as { path: string };
+            es.close();
+            cloneESRef.current = null;
+            setCloneJobId(null);
+            resolve(data.path);
+          });
+
+          es.addEventListener("error", (ev) => {
+            const data = JSON.parse((ev as MessageEvent).data ?? "{}") as { message?: string };
+            es.close();
+            cloneESRef.current = null;
+            setCloneJobId(null);
+            reject(new Error(data.message ?? "Clone failed"));
+          });
+        });
       } catch (err) {
         setCloneError((err as Error).message);
-        setCloning(false);
         return;
       }
-      setCloning(false);
     }
 
     // Step 2: spawn
@@ -86,6 +130,7 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
         workspace,
         model: model || undefined,
         worktree,
+        branch_name: worktree && branchName ? branchName : undefined,
       });
       onSpawned();
       onClose();
@@ -96,11 +141,23 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
     }
   }
 
+  function cancelClone() {
+    if (cloneJobId) {
+      api.cancelClone(cloneJobId).catch(() => {});
+      cloneESRef.current?.close();
+      cloneESRef.current = null;
+      setCloneJobId(null);
+      setCloneLines([]);
+      setClonePct(0);
+    }
+  }
+
   const inputCls =
     "w-full bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-600 rounded px-3 py-2 text-slate-900 dark:text-slate-100 font-mono text-sm focus:outline-none focus:border-purple-500 placeholder:text-slate-400 dark:placeholder:text-slate-600";
 
+  const cloning = cloneJobId !== null;
   const isBusy = cloning || loading;
-  const busyLabel = cloning ? "Cloning…" : loading ? "Starting agent…" : "Spawn";
+  const busyLabel = loading ? "Starting agent…" : "Spawn";
 
   return (
     <div
@@ -158,7 +215,12 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
           <input
             type="text"
             value={form.name ?? ""}
-            onChange={(e) => set("name", e.target.value)}
+            onChange={(e) => {
+              set("name", e.target.value);
+              if (!branchEdited) {
+                setBranchName(slugify(e.target.value));
+              }
+            }}
             placeholder="auto-generated"
             className={inputCls}
           />
@@ -280,10 +342,6 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
                   </label>
                 </div>
               )}
-
-              {cloneError && (
-                <p className="text-red-600 dark:text-red-400 text-xs break-all">{cloneError}</p>
-              )}
             </div>
           )}
         </div>
@@ -333,6 +391,30 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
           </label>
         </div>
 
+        {worktree && (
+          <label className="block mb-4">
+            <span className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">
+              Branch name <span className="text-slate-400 dark:text-slate-600">(optional)</span>
+            </span>
+            <input
+              type="text"
+              value={branchName}
+              onChange={(e) => {
+                setBranchName(e.target.value);
+                setBranchEdited(e.target.value !== "");
+              }}
+              placeholder={form.name ? slugify(form.name) : "auto-derived from session name"}
+              className={inputCls}
+            />
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              Branch will be created as{" "}
+              <code className="font-mono">
+                meru/{branchName || slugify(form.name ?? "") || "…"}
+              </code>
+            </p>
+          </label>
+        )}
+
         {loading && (
           <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
             Starting the agent process — this may take a few seconds…
@@ -340,6 +422,43 @@ export function SpawnModal({ onClose, onSpawned, initial }: Props) {
         )}
 
         {error && <p className="text-red-600 dark:text-red-400 text-sm mb-3">{error}</p>}
+
+        {!cloneJobId && cloneError && (
+          <p className="text-red-600 dark:text-red-400 text-sm mb-3">{cloneError}</p>
+        )}
+
+        {cloneJobId && (
+          <div className="mb-4 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Cloning repository…
+              </span>
+              <button
+                type="button"
+                onClick={cancelClone}
+                className="text-xs text-red-500 hover:text-red-700 dark:text-red-400"
+              >
+                Cancel
+              </button>
+            </div>
+            {clonePct > 0 && (
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
+                <div
+                  className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${clonePct}%` }}
+                />
+              </div>
+            )}
+            <div className="bg-slate-950 rounded p-2 h-28 overflow-y-auto font-mono text-xs text-slate-300 space-y-0.5">
+              {cloneLines.map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
+            {cloneError && (
+              <p className="text-red-500 dark:text-red-400 text-xs mt-2">{cloneError}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <button

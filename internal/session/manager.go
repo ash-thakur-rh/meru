@@ -31,9 +31,10 @@ type Manager struct {
 
 // entry pairs a live Session with its last-known status.
 type entry struct {
-	sess      agent.Session
-	repoRoot  string // non-empty if a worktree was created
-	sessionID string // copy for cleanup
+	sess           agent.Session
+	repoRoot       string // non-empty if a worktree was created
+	worktreeID     string // ID (UUID) used as the worktree directory name
+	worktreeBranch string // branch slug used for the git branch (meru/<worktreeBranch>)
 }
 
 // SessionEvent is broadcast to subscribers when something happens.
@@ -71,16 +72,24 @@ func (m *Manager) Spawn(ctx context.Context, agentName string, cfg agent.SpawnCo
 		cfg.Name = agentName + "-" + uuid.New().String()[:8]
 	}
 
+	// Resolve the branch name: explicit > slug of session name > short ID fallback.
+	if cfg.BranchName == "" {
+		cfg.BranchName = workspace.SlugifyBranch(cfg.Name)
+	}
+	if cfg.BranchName == "" {
+		cfg.BranchName = "sess-" + uuid.New().String()[:8]
+	}
+
 	// For local nodes, create the worktree here so the manager can clean it up on stop.
 	// Remote nodes handle worktree creation themselves (via the Worktree field in SpawnRequest).
-	var repoRoot string
+	var repoRoot, worktreeID string
 	if nodeName == node.LocalNodeName && cfg.Worktree && workspace.IsGitRepo(cfg.Workspace) {
 		root, err := workspace.RepoRoot(cfg.Workspace)
 		if err != nil {
 			return nil, fmt.Errorf("find repo root: %w", err)
 		}
-		tmpID := uuid.New().String()
-		wtPath, err := m.wt.CreateWorktree(root, tmpID)
+		worktreeID = uuid.New().String()
+		wtPath, err := m.wt.CreateWorktree(root, worktreeID, cfg.BranchName)
 		if err != nil {
 			return nil, fmt.Errorf("create worktree: %w", err)
 		}
@@ -88,7 +97,7 @@ func (m *Manager) Spawn(ctx context.Context, agentName string, cfg agent.SpawnCo
 		repoRoot = root
 		defer func() {
 			if repoRoot != "" {
-				_ = m.wt.RemoveWorktree(root, tmpID)
+				_ = m.wt.RemoveWorktree(root, worktreeID, cfg.BranchName)
 			}
 		}()
 	}
@@ -102,6 +111,7 @@ func (m *Manager) Spawn(ctx context.Context, agentName string, cfg agent.SpawnCo
 		"workspace", cfg.Workspace,
 		"node", nodeName,
 		"worktree", cfg.Worktree,
+		"branch", cfg.BranchName,
 	)
 
 	sess, err := n.Spawn(ctx, sessionID, agentName, cfg)
@@ -127,8 +137,13 @@ func (m *Manager) Spawn(ctx context.Context, agentName string, cfg agent.SpawnCo
 	}
 
 	m.mu.Lock()
-	m.sessions[sess.ID()] = &entry{sess: sess, repoRoot: repoRoot, sessionID: sess.ID()}
-	repoRoot = ""
+	m.sessions[sess.ID()] = &entry{
+		sess:           sess,
+		repoRoot:       repoRoot,
+		worktreeID:     worktreeID,
+		worktreeBranch: cfg.BranchName,
+	}
+	repoRoot = "" // prevent defer from cleaning up on success
 	m.mu.Unlock()
 
 	return sess, nil
@@ -214,7 +229,7 @@ func (m *Manager) Stop(id string) error {
 	slog.Info("stopping session", "session", id, "name", e.sess.Name())
 	_ = m.store.UpdateSessionStatus(id, string(agent.StatusStopped))
 	if e.repoRoot != "" {
-		_ = m.wt.RemoveWorktree(e.repoRoot, e.sessionID)
+		_ = m.wt.RemoveWorktree(e.repoRoot, e.worktreeID, e.worktreeBranch)
 	}
 	return e.sess.Stop()
 }

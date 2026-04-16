@@ -114,7 +114,7 @@ func TestCreateWorktree(t *testing.T) {
 	dir := initRepo(t)
 	m := workspace.New()
 
-	wtPath, err := m.CreateWorktree(dir, "test-session")
+	wtPath, err := m.CreateWorktree(dir, "test-session", "test-branch")
 	if err != nil {
 		t.Fatalf("CreateWorktree: %v", err)
 	}
@@ -135,7 +135,7 @@ func TestCreateWorktree_NotGitRepo(t *testing.T) {
 	dir := t.TempDir()
 	m := workspace.New()
 
-	_, err := m.CreateWorktree(dir, "sess")
+	_, err := m.CreateWorktree(dir, "sess", "my-branch")
 	if err == nil {
 		t.Error("expected error for non-git directory")
 	}
@@ -149,7 +149,7 @@ func TestRemoveWorktree(t *testing.T) {
 	dir := initRepo(t)
 	m := workspace.New()
 
-	wtPath, err := m.CreateWorktree(dir, "rm-session")
+	wtPath, err := m.CreateWorktree(dir, "rm-session", "rm-branch")
 	if err != nil {
 		t.Fatalf("CreateWorktree: %v", err)
 	}
@@ -157,7 +157,7 @@ func TestRemoveWorktree(t *testing.T) {
 		t.Fatalf("worktree path not created: %v", err)
 	}
 
-	if err := m.RemoveWorktree(dir, "rm-session"); err != nil {
+	if err := m.RemoveWorktree(dir, "rm-session", "rm-branch"); err != nil {
 		t.Fatalf("RemoveWorktree: %v", err)
 	}
 

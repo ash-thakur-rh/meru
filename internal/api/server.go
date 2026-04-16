@@ -4,6 +4,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/ash-thakur-rh/meru/internal/agent"
+	"github.com/ash-thakur-rh/meru/internal/gitclone"
 	"github.com/ash-thakur-rh/meru/internal/node"
 	"github.com/ash-thakur-rh/meru/internal/session"
 	"github.com/ash-thakur-rh/meru/internal/store"
@@ -22,14 +24,16 @@ import (
 type Server struct {
 	mgr      *session.Manager
 	store    *store.Store
+	clones   *gitclone.Manager
 	upgrader websocket.Upgrader
 }
 
 // New creates a Server backed by mgr and st.
 func New(mgr *session.Manager, st *store.Store) *Server {
 	return &Server{
-		mgr:   mgr,
-		store: st,
+		mgr:    mgr,
+		store:  st,
+		clones: gitclone.New(),
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
@@ -57,7 +61,11 @@ func (s *Server) Handler(uiHandler http.Handler) http.Handler {
 	})
 
 	r.With(jsonContentType).Get("/fs", s.handleListDir)
-	r.With(jsonContentType).Post("/git/clone", s.handleGitClone)
+	r.Route("/git/clone", func(r chi.Router) {
+		r.With(jsonContentType).Post("/", s.handleGitCloneStart)
+		r.Get("/{id}/stream", s.handleGitCloneStream)
+		r.Delete("/{id}", s.handleGitCloneCancel)
+	})
 
 	r.With(jsonContentType).Route("/sessions", func(r chi.Router) {
 		r.Post("/", s.handleSpawn)
@@ -89,13 +97,14 @@ func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 
 // POST /sessions
 type spawnRequest struct {
-	Agent     string            `json:"agent"`
-	Name      string            `json:"name"`
-	Workspace string            `json:"workspace"`
-	Model     string            `json:"model"`
-	Env       map[string]string `json:"env"`
-	Worktree  bool              `json:"worktree"`
-	Node      string            `json:"node"`
+	Agent      string            `json:"agent"`
+	Name       string            `json:"name"`
+	Workspace  string            `json:"workspace"`
+	Model      string            `json:"model"`
+	Env        map[string]string `json:"env"`
+	Worktree   bool              `json:"worktree"`
+	Node       string            `json:"node"`
+	BranchName string            `json:"branch_name"`
 }
 
 func (s *Server) handleSpawn(w http.ResponseWriter, r *http.Request) {
@@ -113,12 +122,13 @@ func (s *Server) handleSpawn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess, err := s.mgr.Spawn(r.Context(), req.Agent, agent.SpawnConfig{
-		Name:      req.Name,
-		Workspace: req.Workspace,
-		Model:     req.Model,
-		Env:       req.Env,
-		Worktree:  req.Worktree,
-		NodeName:  req.Node,
+		Name:       req.Name,
+		Workspace:  req.Workspace,
+		Model:      req.Model,
+		Env:        req.Env,
+		Worktree:   req.Worktree,
+		NodeName:   req.Node,
+		BranchName: req.BranchName,
 	})
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -442,7 +452,8 @@ type gitCloneRequest struct {
 	Password string `json:"password"`
 }
 
-func (s *Server) handleGitClone(w http.ResponseWriter, r *http.Request) {
+// POST /git/clone — starts an async clone and returns a job ID immediately.
+func (s *Server) handleGitCloneStart(w http.ResponseWriter, r *http.Request) {
 	var req gitCloneRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid JSON: "+err.Error())
@@ -462,12 +473,78 @@ func (s *Server) handleGitClone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path, err := n.GitClone(r.Context(), req.URL, req.Dest, req.Username, req.Password)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	var jobID string
+	if req.NodeName == node.LocalNodeName {
+		jobID = s.clones.StartLocal(req.URL, req.Dest, req.Username, req.Password)
+	} else {
+		captured := req
+		capturedNode := n
+		jobID = s.clones.StartRemote(func(ctx context.Context) (string, error) {
+			return capturedNode.GitClone(ctx, captured.URL, captured.Dest, captured.Username, captured.Password)
+		})
+	}
+
+	writeJSON(w, http.StatusAccepted, map[string]string{"jobId": jobID})
+}
+
+// GET /git/clone/{id}/stream — SSE stream of clone progress.
+func (s *Server) handleGitCloneStream(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	job, ok := s.clones.Get(id)
+	if !ok {
+		writeError(w, http.StatusNotFound, "clone job not found")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"path": path})
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("X-Accel-Buffering", "no")
+	flusher, _ := w.(http.Flusher)
+
+	sent := 0
+
+	sendEvent := func(event, data string) {
+		fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, data)
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}
+
+	for {
+		lines, pct, done, path, jobErr := job.Snapshot()
+
+		for ; sent < len(lines); sent++ {
+			payload, _ := json.Marshal(map[string]any{"line": lines[sent], "pct": pct})
+			sendEvent("log", string(payload))
+		}
+
+		if done {
+			if jobErr != nil {
+				payload, _ := json.Marshal(map[string]string{"message": jobErr.Error()})
+				sendEvent("error", string(payload))
+			} else {
+				payload, _ := json.Marshal(map[string]string{"path": path})
+				sendEvent("done", string(payload))
+			}
+			return
+		}
+
+		select {
+		case <-job.Wait():
+		case <-r.Context().Done():
+			return
+		}
+	}
+}
+
+// DELETE /git/clone/{id} — cancel an in-progress clone.
+func (s *Server) handleGitCloneCancel(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if !s.clones.Cancel(id) {
+		writeError(w, http.StatusNotFound, "clone job not found")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // --- Filesystem ---
