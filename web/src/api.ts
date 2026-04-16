@@ -95,7 +95,13 @@ export const api = {
     node?: string;
     username?: string;
     password?: string;
-  }) => request<{ path: string }>("POST", "/git/clone", p),
+  }) => request<{ jobId: string }>("POST", "/git/clone/", p),
+
+  cancelClone: (jobId: string) =>
+    request<void>("DELETE", `/git/clone/${jobId}`),
+
+  cloneStream: (jobId: string): EventSource =>
+    new EventSource(`/git/clone/${jobId}/stream`),
 
   listSessions: () => request<Session[]>("GET", "/sessions"),
   getSession: (id: string) => request<Session>("GET", `/sessions/${id}`),
