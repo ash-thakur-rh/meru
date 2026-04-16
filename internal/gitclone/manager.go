@@ -1,3 +1,4 @@
+// Package gitclone manages async git clone jobs with SSE-friendly progress notifications.
 package gitclone
 
 import (
